@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Blockchain Voting System{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        {% if session.get('user_id') %}
+        <aside class="sidebar" id="app-sidebar">
+            <div class="sidebar-brand">
+                <i class="fa-solid fa-cube logo-icon"></i>
+                <span>VoteChain</span>
+            </div>
+            
+            <nav class="sidebar-nav">
+                {% if session.get('role') == 'admin' %}
+                    <a href="/admin" class="nav-link {% if request.path == '/admin' %}active{% endif %}">
+                        <i class="fa-solid fa-chart-line"></i> <span>Dashboard</span>
+                    </a>
+                    <a href="#" class="nav-link" id="nav-btn-blockchain">
+                        <i class="fa-solid fa-server"></i> <span>Chain Explorer</span>
+                    </a>
+                    <a href="#" class="nav-link" id="nav-btn-voters">
+                        <i class="fa-solid fa-users"></i> <span>Voters Directory</span>
+                    </a>
+                {% else %}
+                    <a href="/voter" class="nav-link {% if request.path == '/voter' %}active{% endif %}">
+                        <i class="fa-solid fa-square-poll-vertical"></i> <span>Elections</span>
+                    </a>
+                    <a href="#" class="nav-link" id="nav-btn-explorer-voter">
+                        <i class="fa-solid fa-server"></i> <span>Verify Ledger</span>
+                    </a>
+                {% endif %}
+            </nav>
+            
+            <div class="sidebar-user">
+                <div class="user-avatar">
+                    <i class="fa-solid fa-circle-user"></i>
+                </div>
+                <div class="user-info">
+                    <span class="user-name">{{ session.get('full_name') }}</span>
+                    <span class="user-role">{{ session.get('role') | capitalize }}</span>
+                </div>
+            </div>
+            
+            <div class="sidebar-footer">
+                <button class="btn-logout" id="sidebar-logout-btn">
+                    <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+        {% endif %}
+
+        <!-- Main Body -->
+        <main class="main-viewport {% if not session.get('user_id') %}full-width{% endif %}">
+            <!-- Header (only displayed when logged in) -->
+            {% if session.get('user_id') %}
+            <header class="app-header">
+                <button class="mobile-sidebar-toggle" id="sidebar-toggle-btn">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="header-breadcrumb">
+                    <span class="breadcrumb-parent">Console</span>
+                    <i class="fa-solid fa-chevron-right breadcrumb-separator"></i>
+                    <span class="breadcrumb-active">{% block breadcrumb %}Dashboard{% endblock %}</span>
+                </div>
+                <div class="header-actions">
+                    <div class="system-status active">
+                        <span class="status-indicator animate-pulse"></span>
+                        <span class="status-text">Ledger Secured</span>
+                    </div>
+                </div>
+            </header>
+            {% endif %}
+
+            <!-- Main Content Container -->
+            <section class="content-body">
+                {% block content %}{% endblock %}
+            </section>
+        </main>
+    </div>
+
+    <!-- Main JavaScript Bundle -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

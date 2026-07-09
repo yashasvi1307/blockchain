@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+*$py.class
+voting_system.db
+.ipynb_checkpoints/
+.vscode/

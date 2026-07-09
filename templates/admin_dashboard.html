@@ -1,0 +1,289 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Control Panel - VoteChain{% endblock %}
+{% block breadcrumb %}Admin Console{% endblock %}
+
+{% block content %}
+<!-- Top Metrics Cards -->
+<div class="metrics-grid animate-fade-in">
+    <div class="metric-card">
+        <div class="metric-icon bg-blue-tint">
+            <i class="fa-solid fa-square-poll-horizontal"></i>
+        </div>
+        <div class="metric-details">
+            <span class="metric-value" id="metric-elections-count">0</span>
+            <span class="metric-label">Total Elections</span>
+        </div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-icon bg-purple-tint">
+            <i class="fa-solid fa-users"></i>
+        </div>
+        <div class="metric-details">
+            <span class="metric-value" id="metric-voters-count">0</span>
+            <span class="metric-label">Registered Voters</span>
+        </div>
+    </div>
+
+    <div class="metric-card">
+        <div class="metric-icon bg-green-tint">
+            <i class="fa-solid fa-cubes"></i>
+        </div>
+        <div class="metric-details">
+            <span class="metric-value" id="metric-blocks-count">0</span>
+            <span class="metric-label">Ledger Blocks</span>
+        </div>
+    </div>
+
+    <div class="metric-card">
+        <div class="metric-icon bg-blue-tint">
+            <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <div class="metric-details">
+            <span class="metric-value text-success" id="metric-ledger-health">HEALTHY</span>
+            <span class="metric-label">Ledger Integrity</span>
+        </div>
+    </div>
+</div>
+
+<!-- Main Views Wrapper (Toggled via JS) -->
+<div class="views-wrapper animate-fade-in">
+
+    <!-- VIEW 1: ELECTIONS CONTROL PANEL -->
+    <div class="admin-view" id="view-elections">
+        <div class="view-header">
+            <div>
+                <h2>Elections Control Panel</h2>
+                <p>Manage active elections, add candidates, view real-time results, and close ballots.</p>
+            </div>
+            <button class="btn-primary" id="btn-open-create-election-modal">
+                <i class="fa-solid fa-plus"></i> Create Election
+            </button>
+        </div>
+
+        <div class="dashboard-card full-width">
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Election ID</th>
+                            <th>Election Title</th>
+                            <th>Status</th>
+                            <th>Candidates Registered</th>
+                            <th>Quick Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-elections-table-body">
+                        <!-- Dynamically populated -->
+                        <tr>
+                            <td colspan="5" class="table-loading">
+                                <i class="fa-solid fa-spinner fa-spin"></i> Loading election protocols...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW 2: BLOCKCHAIN EXPLORER -->
+    <div class="admin-view hidden" id="view-blockchain">
+        <div class="view-header">
+            <div>
+                <h2>Cryptographic Blockchain Explorer</h2>
+                <p>Verify links, calculate hashes, trace vote transaction blocks, and inspect tamper alerts.</p>
+            </div>
+            <div class="view-actions">
+                <a href="/api/blockchain/export" class="btn-secondary" id="btn-export-blockchain-json">
+                    <i class="fa-solid fa-download"></i> Export JSON Ledger
+                </a>
+                <button class="btn-primary" id="btn-admin-verify-chain">
+                    <i class="fa-solid fa-arrows-rotate"></i> Verify Chain Integrity
+                </button>
+            </div>
+        </div>
+
+        <!-- Verification Alerts -->
+        <div class="alert-message error hidden" id="admin-chain-alert-tamper">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span class="message-text"><b>TAMPER DETECTION WARNING:</b> Crypto signature mismatch detected in block sequence.</span>
+        </div>
+        <div class="alert-message success hidden" id="admin-chain-alert-valid">
+            <i class="fa-solid fa-circle-check"></i>
+            <span class="message-text"><b>LEDGER INTEGRITY VERIFIED:</b> All blocks are signed, validly chained, and secure.</span>
+        </div>
+
+        <!-- Diagnostic Log Output -->
+        <div class="diagnostic-log-section hidden" id="admin-diagnostic-log-container">
+            <h4>Diagnostic Output Log</h4>
+            <div class="diagnostic-log font-mono" id="admin-diagnostic-log-content">
+                <!-- Live diagnostics populated here -->
+            </div>
+        </div>
+
+        <!-- Block Sequence Explorer -->
+        <div class="explorer-timeline-title">
+            <h4>Chain Block Ledger Sequence</h4>
+        </div>
+        <div class="admin-blocks-grid" id="admin-blocks-list-container">
+            <!-- Dynamically populated Blocks Cards -->
+        </div>
+    </div>
+
+    <!-- VIEW 3: VOTERS DIRECTORY -->
+    <div class="admin-view hidden" id="view-voters">
+        <div class="view-header">
+            <div>
+                <h2>Registered Voters Directory</h2>
+                <p>Authorized voter entities in the system. Password keys are fully encrypted.</p>
+            </div>
+        </div>
+
+        <div class="dashboard-card full-width">
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Voter ID</th>
+                            <th>Full Name</th>
+                            <th>Username</th>
+                            <th>Email Address</th>
+                            <th>Registered At</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-voters-table-body">
+                        <!-- Dynamically populated -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ==========================================
+     MODALS SECTION
+     ========================================== -->
+
+<!-- 1. Create Election Modal -->
+<div class="modal-overlay hidden" id="modal-create-election">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3>Create New Election Protocol</h3>
+            <button class="modal-close" id="modal-close-create-election">&times;</button>
+        </div>
+        <form id="form-create-election">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="election-title-input">Election Title</label>
+                    <input type="text" id="election-title-input" required placeholder="e.g. Presidential Election 2026">
+                </div>
+                <div class="form-group">
+                    <label for="election-desc-input">Description</label>
+                    <textarea id="election-desc-input" rows="3" placeholder="Provide background or rules..."></textarea>
+                </div>
+                <div class="alert-message error hidden" id="create-election-error-msg">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span class="message-text">Error creating election.</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="btn-cancel-create-election">Cancel</button>
+                <button type="submit" class="btn-primary">Initialize Protocol</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 2. Add Candidate Modal -->
+<div class="modal-overlay hidden" id="modal-add-candidate">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3>Register Election Candidate</h3>
+            <button class="modal-close" id="modal-close-add-candidate">&times;</button>
+        </div>
+        <form id="form-add-candidate">
+            <input type="hidden" id="add-candidate-election-id">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="candidate-name-input">Candidate Name</label>
+                    <input type="text" id="candidate-name-input" required placeholder="e.g. John Doe">
+                </div>
+                <div class="form-group">
+                    <label for="candidate-party-input">Political/Affiliated Party</label>
+                    <input type="text" id="candidate-party-input" required placeholder="e.g. Democratic Alliance">
+                </div>
+                <div class="form-group">
+                    <label for="candidate-details-input">Candidate/Party Manifesto Details</label>
+                    <textarea id="candidate-details-input" rows="3" placeholder="Details or notes about candidate..."></textarea>
+                </div>
+                <div class="alert-message error hidden" id="add-candidate-error-msg">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span class="message-text">Error adding candidate.</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="btn-cancel-add-candidate">Cancel</button>
+                <button type="submit" class="btn-primary">Register Candidate</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 3. View Results / Manage Candidates Modal -->
+<div class="modal-overlay hidden" id="modal-election-results">
+    <div class="modal-container large">
+        <div class="modal-header">
+            <div>
+                <h3 id="results-modal-title">Election Results Overview</h3>
+                <p id="results-modal-subtitle" class="text-sm text-gray">Detailed information and actions.</p>
+            </div>
+            <button class="modal-close" id="modal-close-election-results">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="results-layout">
+                <!-- Candidates Registered and Votes -->
+                <div class="results-left">
+                    <div class="results-header-actions">
+                        <h4>Ballot Standing</h4>
+                        <div id="results-export-actions">
+                            <!-- Export PDF button here -->
+                        </div>
+                    </div>
+                    <div class="results-votes-container" id="results-votes-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Manage/Config Details -->
+                <div class="results-right">
+                    <h4>Election Protocols</h4>
+                    <div class="details-panel">
+                        <div class="details-row">
+                            <span class="lbl">Protocol ID:</span>
+                            <span class="val font-mono" id="results-detail-id">1</span>
+                        </div>
+                        <div class="details-row">
+                            <span class="lbl">Status Code:</span>
+                            <span class="val font-semibold" id="results-detail-status">ACTIVE</span>
+                        </div>
+                        <div class="details-row">
+                            <span class="lbl">Registered Voters Count:</span>
+                            <span class="val" id="results-detail-votes-count">0</span>
+                        </div>
+                    </div>
+
+                    <div class="results-admin-actions" id="results-admin-controls-card">
+                        <h5>Administrator Controls</h5>
+                        <p class="text-sm">Closing the election locks the voting booth and stops all new block minting for this protocol.</p>
+                        <button class="btn-danger full-width" id="btn-admin-close-election">
+                            <i class="fa-solid fa-lock"></i> Close Ballot Protocol
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

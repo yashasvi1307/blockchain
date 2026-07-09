@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Register Voter - VoteChain System{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card animate-fade-in">
+        <div class="auth-header">
+            <div class="auth-logo">
+                <i class="fa-solid fa-cube logo-icon"></i>
+            </div>
+            <h2>Register Voter Profile</h2>
+            <p>Establish your unique cryptographic voter identity</p>
+        </div>
+        
+        <form class="auth-form" id="register-form">
+            <div class="form-group">
+                <label for="full_name">Full Name</label>
+                <div class="input-with-icon">
+                    <i class="fa-regular fa-id-card"></i>
+                    <input type="text" id="full_name" name="full_name" placeholder="Enter your full legal name" required autocomplete="name">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <div class="input-with-icon">
+                    <i class="fa-regular fa-envelope"></i>
+                    <input type="email" id="email" name="email" placeholder="example@domain.com" required autocomplete="email">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="reg-username">Username</label>
+                <div class="input-with-icon">
+                    <i class="fa-regular fa-user"></i>
+                    <input type="text" id="reg-username" name="username" placeholder="Choose a unique username" required autocomplete="username">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="reg-password">Password</label>
+                <div class="input-with-icon">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="reg-password" name="password" placeholder="At least 6 characters" minlength="6" required autocomplete="new-password">
+                </div>
+            </div>
+            
+            <!-- Toast alerts placeholder inside form -->
+            <div class="alert-message error hidden" id="register-error-msg">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span class="message-text">Registration failed.</span>
+            </div>
+
+            <div class="alert-message success hidden" id="register-success-msg">
+                <i class="fa-solid fa-circle-check"></i>
+                <span class="message-text">Profile initialized successfully! Redirecting...</span>
+            </div>
+            
+            <button type="submit" class="btn-primary auth-submit-btn" id="btn-register-submit">
+                <span>Generate Identity</span>
+                <i class="fa-solid fa-user-plus"></i>
+            </button>
+        </form>
+        
+        <div class="auth-footer">
+            <p>Already have a profile? <a href="/login" class="link-highlight">Access portal</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

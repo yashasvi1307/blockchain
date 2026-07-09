@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}Voter Console - VoteChain{% endblock %}
+{% block breadcrumb %}Voter Console{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid animate-fade-in">
+    <!-- Active Elections Sidebar/List (Left Column) -->
+    <div class="dashboard-card elections-card">
+        <div class="card-header">
+            <h3><i class="fa-solid fa-check-to-slot icon-blue"></i> Ongoing Elections</h3>
+            <p>Select an election to view candidates and cast your vote.</p>
+        </div>
+        
+        <div class="elections-list-container" id="voter-elections-list">
+            <!-- Dynamically populated via JS -->
+            <div class="spinner-container">
+                <i class="fa-solid fa-spinner fa-spin"></i> Loading elections...
+            </div>
+        </div>
+    </div>
+    
+    <!-- Election Details & Voting Panel (Right Column) -->
+    <div class="dashboard-card voting-panel-card" id="voting-panel">
+        <div class="empty-state" id="voting-panel-empty">
+            <i class="fa-solid fa-person-booth empty-icon"></i>
+            <h4>No Election Selected</h4>
+            <p>Please select an election from the left panel to begin voting.</p>
+        </div>
+        
+        <!-- Active Voting Panel (Hidden by default) -->
+        <div class="voting-panel-content hidden" id="voting-panel-active">
+            <div class="election-info-summary">
+                <div class="election-badge active">OPEN</div>
+                <h2 id="voting-election-title">Presidency 2026</h2>
+                <p id="voting-election-desc" class="election-description">National presidential general voting protocol.</p>
+            </div>
+            
+            <div class="voting-candidates-section">
+                <h4>Registered Candidates</h4>
+                <p class="section-subtext">Choose one candidate to receive your vote. This action is final.</p>
+                
+                <form id="vote-submission-form">
+                    <input type="hidden" id="vote-election-id" name="election_id">
+                    
+                    <div class="candidates-grid" id="voting-candidates-grid">
+                        <!-- Dynamically populated via JS -->
+                    </div>
+                    
+                    <div class="alert-message error hidden" id="vote-error-msg">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span class="message-text">Please select a candidate before submitting.</span>
+                    </div>
+                    
+                    <div class="vote-submit-action">
+                        <button type="submit" class="btn-primary btn-large" id="btn-vote-submit">
+                            <i class="fa-solid fa-square-check"></i>
+                            <span>Cast Secure Ballot</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Receipt/Already Voted Panel (Hidden by default) -->
+        <div class="voting-panel-content hidden" id="voting-panel-receipt">
+            <div class="receipt-success-header animate-scale-up">
+                <div class="success-icon-wrap">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <h3>Ballot Submitted & Cryptographically Verified</h3>
+                <p>Your vote has been written as an immutable transaction block in the distributed ledger.</p>
+            </div>
+            
+            <div class="receipt-card">
+                <div class="receipt-row font-mono">
+                    <span class="label">Ledger Block Index:</span>
+                    <span class="value text-highlight" id="receipt-block-index">#14</span>
+                </div>
+                <div class="receipt-row font-mono">
+                    <span class="label">Cryptographic Hash:</span>
+                    <span class="value text-truncate" id="receipt-block-hash">a9d8f7e6c5...3b2a1f0e</span>
+                </div>
+                <div class="receipt-row font-mono">
+                    <span class="label">Block Timestamp:</span>
+                    <span class="value" id="receipt-timestamp">2026-07-07 15:45:00</span>
+                </div>
+                <div class="receipt-row font-mono">
+                    <span class="label">Ledger Link Status:</span>
+                    <span class="value text-success"><i class="fa-solid fa-link"></i> Linked & Verified</span>
+                </div>
+            </div>
+            
+            <div class="receipt-info-text text-center">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>One Person, One Vote. Your identity is anonymized, and your ballot is untamperable.</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ledger Verification Modal (Interactive Overlay) -->
+<div class="modal-overlay hidden" id="modal-blockchain-explorer">
+    <div class="modal-container large">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-server icon-blue"></i> Cryptographic Ledger Verification</h3>
+            <button class="modal-close" id="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="verification-dashboard">
+                <div class="verification-stats">
+                    <div class="stat-card">
+                        <span class="stat-value" id="modal-chain-length">0</span>
+                        <span class="stat-label">Total Blocks</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value text-success" id="modal-chain-status">PENDING</span>
+                        <span class="stat-label">Chain Integrity</span>
+                    </div>
+                    <div class="stat-card action-card">
+                        <button class="btn-secondary font-semibold" id="modal-btn-verify-chain">
+                            <i class="fa-solid fa-arrows-rotate"></i> Verify Chain Integrity
+                        </button>
+                    </div>
+                </div>
+
+                <div class="verification-feedback hidden" id="verification-log-container">
+                    <h5>Integrity Diagnostic Log</h5>
+                    <div class="diagnostic-log font-mono" id="verification-diagnostic-log">
+                        <!-- Diagnostic entries added here -->
+                    </div>
+                </div>
+
+                <div class="ledger-blocks-list">
+                    <h5>Explorer Block Ledger</h5>
+                    <div class="explorer-blocks-container" id="modal-blocks-list">
+                        <!-- Dynamically populated blocks -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
